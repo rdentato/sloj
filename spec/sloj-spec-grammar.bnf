@@ -1,0 +1,565 @@
+(* EBNF Grammar for the Sloj language *)
+
+(* Document structure *)
+(* Sloj documents are typically embedded in Markdown. See sloj-spec-markdown.md
+   for details on how Sloj integrates with Markdown document structure. *)
+Document          := DocumentElement+
+
+DocumentElement   := Annotation* (Sentence | CodeBlock)
+
+(* Sentence with precedence: Disjunction of Conjunctions *)
+(* A VP list, if present, MUST be the final element of the sentence.
+   Sentences with a VP list do not end with '.'; each list item ends with '.'. *)
+
+Sentence          := DisjunctSent '.'
+                   | DisjunctSentWithList
+                   | NPListSent
+                   | 'either' ConjunctSent ', or' ConjunctSent '.'
+                   | 'neither' ConjunctSent ', nor' ConjunctSent '.'
+                   | ConditionalSent '.'
+                   | ConditionalSentWithList
+                   | OtherwiseSent "."
+                   | TemporalSent '.'
+                   | TemporalSequence '.'
+                   | WhileSentWithList
+                   | PurposeSent '.'
+
+(* Temporal and Future Statements - See Section 4 *)
+
+(* Basic future forms *)
+TemporalSent      := NounPhrase FutureAux VPBody TemporalSuffix?
+                   | TemporalPrefix ',' NounPhrase FutureAux VPBody
+
+FutureAux         := 'will' | 'will always' | 'will eventually' | 'will immediately' 
+                   | 'will then' | 'will never' | 'will not' | "won't"
+
+(* Temporal prefixes: before/after/while *)
+TemporalPrefix    := 'before' ConditionClause
+                   | 'after' ConditionClause
+                   | 'after' ConditionClause 'and before' ConditionClause
+                   | 'while' ConditionClause
+
+(* Temporal suffixes: until/unless/within/for/every *)
+TemporalSuffix    := 'until' ConditionClause
+                   | 'unless' ConditionClause
+                   | 'within' Duration
+                   | 'for' Duration
+                   | 'every' Duration
+                   | 'at least every' Duration
+                   | 'at most every' Duration
+                   | 'every' Duration 'to' Duration
+
+(* Temporal sequences: first...then...finally *)
+TemporalSequence  := 'first' SimpleSent (',' 'then' SimpleSent)+ (',' 'finally' SimpleSent)?
+
+(* While with statement list. See Section 4.3.
+   Uses ConsequenceList for the list items (same as conditionals). *)
+WhileSentWithList := 'while' ConditionClause ', either'? ':' NEWLINE ConsequenceList
+
+(* Duration *)
+Duration          := Number DurationUnit
+
+DurationUnit      := 'nanosecond' | 'nanoseconds' | 'ns'
+                   | 'millisecond' | 'milliseconds' | 'ms'
+                   | 'second' | 'seconds' | 'sec'
+                   | 'minute' | 'minutes' | 'min'
+                   | 'hour' | 'hours' | 'hr'
+                   | 'day' | 'days'
+                   | 'week' | 'weeks'
+                   | 'month' | 'months'
+                   | 'quarter' | 'quarters'
+                   | 'year' | 'years' | 'yr'
+
+
+(* Conditional sentence *)
+(* The condition may use present tense or present perfect. Future is forbidden.
+   The consequence may use present tense or simple future (will + VP). See Section 6. *)
+ConditionalSent   := CondKeyword ConditionClause ', then' ConsequenceClause
+                   | ConsequenceClause ', except when' ConditionClause
+                   | ConsequenceClause ', except if' ConditionClause
+
+CondKeyword       := 'if' | 'whenever' | 'once' | 'each time'
+
+(* Otherwise sentence. Must immediately follow a conditional sentence.
+   Provides the alternative when the preceding condition is false.
+   Uses ConsequenceClause to allow present tense or future (will + VP). *)
+OtherwiseSent     := 'Otherwise,' ConsequenceClause
+
+
+(* Conditional with statement list. See Section 6.3.
+   The grammar is liberal; semantic layer disambiguates coordination type. *)
+ConditionalSentWithList := CondKeyword ConditionClause 'either'? ':' NEWLINE ConsequenceList
+
+ConsequenceList   := ConsequenceListItem+
+
+(* Each list item is a consequence statement. Uses ConsequenceBody, not SimpleSent,
+   to allow future (will + VP) in list items. *)
+ConsequenceListItem := '-' 'or'? 'then'? NounPhrase ConsequenceBody '.'
+
+ConditionClause   := NounPhrase ConditionBody
+
+(* ConsequenceClause allows present tense or simple future (will + VP).
+   Present perfect and other temporal forms are not permitted. *)
+ConsequenceClause := NounPhrase ConsequenceBody
+
+ConsequenceBody   := ConsequenceVP (VerbConj ConsequenceVP)*
+
+ConsequenceVP     := VerbPhrase | FutureVP | FutureGroupVP
+
+(* Future VP for consequences. Only simple 'will' is permitted in consequences,
+   not 'will always', 'will eventually', etc. *)
+FutureVP          := 'will' SimpleVPCore
+
+FutureGroupVP     := 'will' GroupVPCore
+
+(* ConditionBody allows both simple VP and present perfect. *)
+ConditionBody     := ConditionVP (VerbConj ConditionVP)*
+
+ConditionVP       := VerbPhrase | PerfectVP | PerfectGroupVP
+
+(* Disjunction: only the final ConjunctSent may contain a VP list. *)
+DisjunctSent      := ConjunctSent (', or' ConjunctSent)*
+
+DisjunctSentWithList := ConjunctSent (', or' ConjunctSent)* ', or' ConjunctSentWithList
+                      | ConjunctSentWithList
+
+(* Conjunction: only the final SimpleSent may contain a VP list. *)
+ConjunctSent      := SimpleSent ((', and' | ', but' | ', whereas') SimpleSent)*
+
+ConjunctSentWithList := SimpleSent ((', and' | ', but' | ', whereas') SimpleSent)* 
+                        (', and' | ', but' | ', whereas') SimpleSentWithList
+                      | SimpleSentWithList
+
+(* Simple sentence: two variants, with and without VP list. *)
+
+SimpleSent        := NounPhrase VPBody
+                   | ExistentialSent
+
+SimpleSentWithList := NounPhrase VPBodyWithList
+
+VPBody            := VerbPhrase (VerbConj VerbPhrase)*
+
+VPBodyWithList    := VerbPhrase (VerbConj VerbPhrase)* VerbConj VPList
+                   | VPList
+
+(* VP List. See Section 3.7.
+   The grammar is liberal; semantic layer disambiguates coordination type. *)
+VPList            := 'either'? ':' NEWLINE VPListItems
+                   | 'neither' ':' NEWLINE VPListItems
+
+VPListItems       := VPListItem+
+
+VPListItem        := '-' 'or'? 'then'? 'nor'? VerbPhrase '.'
+
+(* NP List Sentence - See Section 8.11 *)
+(* Markdown NP lists must be at end of sentence, like VP lists.
+   An optional trailing ellipsis item indicates an open (non-exhaustive) list. *)
+NPListSent        := NounPhrase VPHead ListKeyword ':' NEWLINE NPListItems EllipsisItem?
+
+NPListItems       := NPListItem+
+
+NPListItem        := '-' ListItem '.'
+
+EllipsisItem      := '-' ('...' | '…') '.'?
+
+(* Existential sentence *)
+ExistentialSent   := 'there is' ExistentialNeg? NounPhrase NonOfPrepPhrase*
+                   | 'there are' ExistentialNeg? NounPhrase NonOfPrepPhrase*
+
+ExistentialNeg    := 'not'
+
+VerbConj          := '&&' | '&& then' | '&&/'
+
+(* Verb Phrase *)
+(* Modals and negation attach to the closest verb (narrow scope).
+   Use guillemets to scope over coordinated VPs.
+   Note: Present perfect is NOT part of VerbPhrase; it uses PerfectVP (see RelativeClause). *)
+VerbPhrase        := SimpleVP | GroupVP | EitherVP | NeitherVP
+
+SimpleVP          := VPPrefix? SimpleVPCore
+
+SimpleVPCore      := Adverb VPHead | VPHead Adverb?
+
+GroupVP           := VPPrefix? GroupVPCore
+
+GroupVPCore       := Adverb GroupBody | GroupBody Adverb?
+
+VPPrefix          := Modal | VPNeg
+
+Modal             := 'must not' | "mustn't"
+                  | 'must'
+                  | 'may preferably'
+                  | 'preferably may'
+                  | 'may'
+                  | 'should not' | "shouldn't"
+                  | 'should'
+                  | 'is expected to'
+                  | 'are expected to'
+                  | 'is not able to' | "can't"
+                  | 'are not able to' | "can't"
+                  | 'is able to' | 'can'
+                  | 'are able to' | 'can'
+
+VPNeg             := 'does not' | "doesn't" | 'do not' | "don't" | 'is not' | "isn't" | 'are not' | "aren't"
+
+(* Unified Verb Phrase Head
+   All verbs (including is/are/be, becomes, seems, runs, validates, etc.)
+   follow the same argument pattern. Semantic validity is checked by the
+   semantic layer, not the grammar. *)
+
+VPHead            := Verb VerbArg? NonOfPrepPhrase*
+                   | SelfVerb NonOfPrepPhrase*
+
+(* Self-prefixed verbs indicate reflexive action. No argument follows. *)
+SelfVerb          := 'self-' Verb
+
+(* Verb argument: NP, Adj, PastParticiple, PP, String, or Comparison.
+   - NP: "John runs a company." / "The dog is a mammal."
+   - Adj: "The light becomes green." / "The dog is fast."
+   - PastPart: "The card is validated." (passive)
+   - PP: "The dog is in the park." (locative predicate)
+   - String: "The status is \"active\"."
+   - Comparison: "Tank A is larger than Tank B." (see Section 6)
+   Semantic layer validates which arguments each verb accepts. *)
+VerbArg           := ObjectNounPhrase | Adjective | PastParticiple | NonOfPrepPhrase | StringLiteral | Comparison | InlineList
+
+(* Comparisons - See Section 6 *)
+Comparison        := ComparativeAdj 'than' Comparand
+                   | 'the' SuperlativeAdj
+                   | 'the' SuperlativeAdj 'of' NounPhrase
+                   | 'equal to' Comparand
+                   | 'not equal to' Comparand
+                   | 'between' NounPhrase
+
+(* Comparative and superlative adverbs appear post-verbally *)
+ComparativeAdv    := <comparative_adverb>
+SuperlativeAdv    := <superlative_adverb>
+
+Comparand         := Number | ObjectNounPhrase | StringLiteral
+
+(* Note: Comparative adverbs use a different pattern:
+   NP VP ComparativeAdv 'than' Comparand
+   This is handled by allowing adverbs in post-verbal position. *)
+
+(* Note: 'between' requires a noun phrase, not bare numbers.
+   Valid: "between the limits", "between the min & the max", "between «30 & 40» degrees"
+   Invalid: "between 30 & 40" (bare numbers)
+   Full support requires measurement phrases (Task 2.7). *)
+
+ComparativeAdj    := <comparative_adjective>
+SuperlativeAdj    := <superlative_adjective>
+
+(* Lists/Enumeration - See Section 8.11 *)
+(* Inline lists use commas to separate items. Keywords determine coordination semantics.
+   Guillemets are required when multiple lists appear or list is followed by more content.
+   An optional trailing ellipsis indicates an open (non-exhaustive) list. *)
+
+InlineList        := ListKeyword ':' InlineListContent
+
+ListKeyword       := 'one of' | 'any of' | 'all of' | 'none of'
+
+InlineListContent := GuillemettedList | SimpleInlineList
+
+GuillemettedList  := '«' ListItems Ellipsis? '»'
+
+SimpleInlineList  := ListItems Ellipsis?    (* ends at sentence boundary *)
+
+ListItems         := ListItem (',' ListItem)*
+
+ListItem          := NounPhrase | Number | StringLiteral | ProperNoun
+
+Ellipsis          := ',' ('...' | '…')
+
+(* Note: Lists cannot be nested. At least one item is required.
+   The ellipsis, if present, must be the final element and indicates an open list. *)
+
+GroupBody         := '«' VerbPhrase (VerbConj VerbPhrase)* '»'
+
+EitherVP          := 'either' VerbPhrase ', or' VerbPhrase
+
+NeitherVP         := 'neither' VerbPhrase ', nor' VerbPhrase
+
+(* Of-clause and Prepositional Phrase *)
+(* Binding and determinism rules (see Section 3.3):
+   - An of-clause always binds to the preceding noun phrase.
+   - A non-'of' prepositional phrase binds to the preceding verb if there is one; otherwise it binds to the preceding noun phrase.
+   - In object position after a verb, a noun phrase MUST NOT contain a non-'of' prepositional phrase unless it is guillemeted.
+   - Guillemets override default binding. *)
+
+OfClause          := 'of' NounPhrase
+
+NonOfPrepPhrase   := NonOfPreposition NounPhrase
+
+NonOfPreposition  := 'in' | 'on' | 'at' | 'under' | 'above' | 'below'
+                   | 'beside' | 'between' | 'before' | 'after' | 'during'
+                   | 'until' | 'with' | 'from' | 'by' | 'to' | 'for' | 'as' | 'through'
+
+(* Noun Phrase *)
+NounPhrase        := NounCore ExceptSuffix?
+
+NounCore          := NounTerm (NounConj NounTerm)*
+
+ExceptSuffix      := 'except' ExceptTarget
+
+ExceptTarget      := NounCore | ExceptProNP
+
+ExceptProNP       := 'the' ('one' | 'ones') RelativeClause
+
+NounTerm          := CommonNP | ProperNP | UniqueNP | MassNP | PronounNP | PartitiveNP | MeasurementNP | AmountOfNP | '«' NounPhrase '»'
+
+(* Object-position noun phrases are restricted for determinism.
+   To attach a non-'of' prepositional phrase to an object NP, wrap the NP in guillemets. *)
+
+ObjectNounPhrase  := ObjectNounCore ExceptSuffix?
+
+ObjectNounCore    := ObjectNounTerm (NounConj ObjectNounTerm)*
+
+ObjectNounTerm    := CommonNPObj
+                   | ProperNPObj
+                   | UniqueNPObj
+                   | MassNPObj
+                   | PronounNP
+                   | PartitiveNPObj
+                   | MeasurementNPObj
+                   | '«' NounPhrase '»'
+
+(* Binding: a proper noun can be bound to a common, unique, or mass NP.
+   Forms: implicit (juxtaposition), appositive (commas), or explicit (named/called). *)
+
+CommonNP          := Determiner Adjective* CommonNoun Binding? OfClause* NonOfPrepPhrase* RelativeClause?
+
+ProperNP          := ProperNoun OfClause* NonOfPrepPhrase* RelativeClause?
+
+UniqueNP          := Determiner Adjective* UniqueNoun Binding? OfClause* NonOfPrepPhrase* RelativeClause?
+
+MassNP            := MassDeterminer Adjective* MassNoun Binding? OfClause* NonOfPrepPhrase* RelativeClause?
+
+Binding           := ProperNoun
+                   | ',' ProperNoun ','
+                   | ', named' ProperNoun ','
+                   | ', called' ProperNoun ','
+
+(* Note: The 'aka' binding form from Sngl is not supported in Sloj. *)
+
+CommonNPObj       := Determiner Adjective* CommonNoun Binding? OfClause* RelativeClause?
+
+ProperNPObj       := ProperNoun OfClause* RelativeClause?
+
+UniqueNPObj       := Determiner Adjective* UniqueNoun Binding? OfClause* RelativeClause?
+
+MassNPObj         := MassDeterminer Adjective* MassNoun Binding? OfClause* RelativeClause?
+
+NounConj          := '&' | '/' | '&/'
+
+(* Partitives *)
+PartitiveNP        := PartitiveHead OfThe PartitiveComp
+
+PartitiveNPObj     := PartitiveHead OfThe PartitiveCompObj
+
+OfThe              := 'of the'
+
+PartitiveComp      := Adjective* PartitiveNoun OfClause* NonOfPrepPhrase* RelativeClause?
+
+PartitiveCompObj   := Adjective* PartitiveNoun OfClause* RelativeClause?
+
+PartitiveNoun      := CommonNoun | UniqueNoun | MassNoun
+
+PartitiveHead      := ProportionPartitiveHead | CountPartitiveHead
+
+ProportionPartitiveHead := 'some' | 'all' | 'none' | 'most' | 'half' | Percent
+
+CountPartitiveHead := Number
+                  | 'only' Number
+                  | 'exactly' Number
+                  | 'at least' Number
+                  | 'at most' Number
+                  | 'between' Number 'and' Number
+
+Percent            := Number '%'
+
+(* The percent sign is a literal token in this EBNF. *)
+
+(* Measurement Phrases - See Section 8.7 *)
+(* Measurement phrases make mass nouns countable: Number Unit of MassNoun *)
+MeasurementNP     := Number Unit 'of' MassNoun
+
+MeasurementNPObj  := Number Unit 'of' MassNoun
+
+Unit              := <unit>
+
+(* Note: Units are lexicon entries (e.g., liter, megabyte, second, meter).
+   Agreement follows the number: singular for 1, plural otherwise. *)
+
+(* Mass Comparisons - See Section 8.8 *)
+(* Mass comparisons are handled as special determiners 'more' and 'less'
+   followed by mass nouns, used with 'than' in comparative constructions.
+   'the amount of' is a fixed phrase that converts mass to countable. *)
+
+AmountOfNP        := 'the amount of' MassNP
+
+(* Pronouns *)
+(* Reflexive pronouns are not used; use self- prefix on verbs instead. *)
+PronounNP         := SubjectPronoun | ObjectPronoun | PossessivePronoun
+
+SubjectPronoun    := 'he' | 'she' | 'it' | 'they'
+
+ObjectPronoun     := 'him' | 'her' | 'it' | 'them'
+
+PossessivePronoun := 'his' | 'hers' | 'its' | 'theirs'
+
+(* Adjective *)
+Adjective         := AdjTerm (AdjConj AdjTerm)*
+
+AdjTerm           := <adjective> | '«' Adjective '»'
+
+AdjConj           := '&' | '/' | '&/'
+
+(* Adverb *)
+(* Adverbs may include comparative forms with 'than' for comparisons.
+   Example: "Process A completes faster than Process B." *)
+
+Adverb            := AdvTerm (AdvConj AdvTerm)*
+                   | ComparativeAdv 'than' Comparand
+                   | 'the' SuperlativeAdv
+                   | 'the' SuperlativeAdv 'of' NounPhrase
+
+AdvTerm           := <adverb> | '«' Adverb '»'
+
+AdvConj           := '&' | '/' | '&/'
+
+(* Relative Clause *)
+(* Present perfect is permitted in relative clauses. See Section 3.8. *)
+RelativeClause    := 'that' RelVerbPhrase
+
+(* RelVerbPhrase allows both simple and perfect forms. *)
+RelVerbPhrase     := VerbPhrase | PerfectVP | PerfectGroupVP
+
+(* Present Perfect VP *)
+(* Present perfect is restricted to relative clauses and conditional antecedents.
+   It expresses that a predicate held at some prior time-point. *)
+PerfectVP         := PerfectAux PerfectNeg? PerfectCore
+
+PerfectGroupVP    := PerfectAux PerfectNeg? PerfectGroupCore
+
+PerfectAux        := 'has' | 'have'
+
+PerfectNeg        := 'not' | 'never'
+
+(* Contractions: The lexer normalizes contracted forms to their full equivalents:
+   - "isn't" → "is not"
+   - "aren't" → "are not"
+   - "doesn't" → "does not"
+   - "don't" → "do not"
+   - "hasn't" → "has not"
+   - "haven't" → "have not"
+   - "won't" → "will not"
+   - "mustn't" → "must not"
+   - "shouldn't" → "should not"
+   - "can't" → "is not able to" / "are not able to" (context-dependent)
+   
+   The grammar accepts both contracted and full forms as equivalent. *)
+
+PerfectCore       := Adverb PerfectHead | PerfectHead Adverb?
+
+PerfectGroupCore  := Adverb PerfectGroupBody | PerfectGroupBody Adverb?
+
+(* PerfectHead uses the same unified VerbArg as VPHead.
+   Examples: "has logged-in", "has been validated", "has been active", "has become green" *)
+PerfectHead       := PastParticiple VerbArg? NonOfPrepPhrase*
+
+PerfectGroupBody  := '«' PerfectHead (VerbConj PerfectHead)* '»'
+
+PastParticiple    := <past_participle>
+
+(* String Literals *)
+(* Strings are invisible to pronoun resolution. *)
+StringLiteral      := DoubleQuotedString | BacktickString
+
+DoubleQuotedString := '"' <string_content> '"'
+
+BacktickString     := '`' <string_content> '`'
+
+(* <string_content> represents arbitrary text with escaped delimiters (\" or \`) and escaped backslashes (\\). *)
+
+(* Purpose Clauses *)
+(* Purpose clauses express intent/rationale. They are non-normative and do not
+   change the formal logic mapping. See Section 10. *)
+
+PurposeSent       := 'In order to' PurposeVP ',' DisjunctSent '.'
+                   | DisjunctSent ', in order to' PurposeVP '.'
+                   | ConjunctSent ', in order to' PurposeVP ',' SimpleSent '.'
+
+PurposeVP         := InfinitiveVP
+
+(* InfinitiveVP is a base verb form with no explicit subject.
+   It uses the same structure as VPCore but without subject agreement. *)
+InfinitiveVP      := BaseVerb VerbArg? NonOfPrepPhrase*
+                   | 'be' VerbArg NonOfPrepPhrase*
+
+BaseVerb          := <base_verb_form>
+
+(* Fenced Code Blocks *)
+(* Code blocks appear between sentences, not inline.
+   They are invisible to pronoun resolution. *)
+CodeBlock         := TripleBacktickBlock | TripleTildeBlock
+
+TripleBacktickBlock := '```' SP* Language? NEWLINE CodeContent NEWLINE '```'
+
+TripleTildeBlock    := '~~~' SP* Language? NEWLINE CodeContent NEWLINE '~~~'
+
+Language          := <language_identifier>
+
+CodeContent       := <arbitrary_text>
+
+SP                := ' '
+
+(* The opening fence may have optional spaces before the language identifier.
+   Valid forms: ```python, ``` python, ```, ```  python
+   <language_identifier> is an optional language name (e.g., python, json, sql).
+   <arbitrary_text> represents the code block content, taken verbatim. *)
+
+(* Annotations *)
+(* Annotations provide metadata for requirements. They are non-normative and do not
+   affect the formal logic mapping. See Section 11. *)
+
+Annotation        := '[[' AnnotationContent ']]' NEWLINE
+
+AnnotationContent := KeyValuePairs | FreeText
+
+KeyValuePairs     := KeyValuePair (',' SP* KeyValuePair)*
+
+KeyValuePair      := Identifier ':' SP* AnnotationValue
+
+AnnotationValue   := <annotation_value>
+
+FreeText          := <free_text>
+
+Identifier        := <identifier>
+
+(* <annotation_value> represents text up to comma or closing ']]', trimmed of leading/trailing whitespace.
+   <free_text> represents arbitrary text (no commas at top level) up to closing ']]'.
+   <identifier> represents a valid identifier (letters, digits, hyphens, underscores). *)
+
+NEWLINE           := '\n'
+
+(* Determiner *)
+Determiner        := 'the' | 'a' | 'an' | 'some' | 'every' | 'each' | 'all' | 'no' | 'enough' | 'a distinct'
+                  | 'his' | 'her' | 'its' | 'their'
+                  | 'his own' | 'her own' | 'its own' | 'their own'
+                  | Number | 'at least' Number | 'at most' Number | 'exactly' Number
+                  | Number 'to' Number | Number '/' Number
+
+MassDeterminer    := 'the' | 'some' | 'no' | 'more' | 'less' | 'enough'
+
+(* Terminals from lexicon *)
+CommonNoun        := <noun>
+MassNoun          := <mass_noun>
+UniqueNoun        := <unique_noun>
+ProperNoun        := <proper_noun>
+
+(* Verbs *)
+(* All lexicon verbs use the same terminal. Semantic validity of verb + argument
+   combinations is determined by the lexicon, not by the grammar. *)
+Verb              := <verb>
+
+Number            := <number>
