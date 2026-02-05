@@ -2,6 +2,7 @@ statement: Sentence coordination uses DNF structure. Disjunction (, or) is outer
 trigger: Core syntax decision from spec document
 related:
   - 002-symbolic-operators-coordination
+  - 004-left-associative-equal-precedence
 tags:
   - syntax
   - sentence

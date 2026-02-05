@@ -53,16 +53,16 @@ Rules:
 - 3.2 [ ] Temporal logic
 - 3.3 [ ] Operational semantic
 
-4 [!] Tooling
-- 4.1 [ ] Grammar checkers
+4 [ ] Tooling
+- 4.1 [!] Grammar checkers
   - 4.1a sloj-check (syntax checker)
   - 4.2a sloj-lint (semantic checker)
 - 4.2 [!] Formal logic
   - 4.2a [ ] Ontology builder
   - 4.2b [ ] Model Checker
-- 4.3 [ ] LLM usage
-  - 4.3a [ ] sloj-writer skill
-  - 4.3b [ ] sloj-reader skill
+- 4.3 [x] LLM usage
+  - 4.3a [x] sloj-writer prompt
+  - 4.3b [x] sloj-reader prompt
 - 4.3 [!] Admin tools
   - 4.3a Lexicon Manager
   - 4.3b Ontology Manager

@@ -1,0 +1,9 @@
+statement: Multi-word entities that designate a single concept MUST be hyphenated in Sloj (e.g., error-message, John-Ford, session-timeout). This rule comes from SNGL and ensures deterministic tokenization and parsing.
+trigger: Discussion about compound words and morphology from SNGL conventions
+related:
+  - 016-sngl-predecessor-reference
+tags:
+  - morphology
+  - tokenization
+  - SNGL-heritage
+created: 2026-02-05

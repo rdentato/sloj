@@ -35,10 +35,21 @@ Sentences use a two-level hierarchy enforcing Disjunctive Normal Form (DNF):
 | Disjunction (outer) | `, or` | $S_1 \lor S_2$ |
 | Conjunction (inner) | `, and` / `, but` / `, whereas` | $S_1 \land S_2$ |
 
+**Fixed English forms (sentence coordination only):**
+
+| Form | Meaning | Logic |
+|------|---------|-------|
+| `Either` S₁ `, or` S₂ | Exclusive disjunction | $S_1 \oplus S_2$ |
+| `Neither` S₁ `, nor` S₂ | Negative conjunction | $\lnot S_1 \land \lnot S_2$ |
+
+**Note:** At sentence level, `Either`/`Neither` begins the sentence; at VP level, the subject precedes them. This disambiguates sentence coordination from VP coordination.
+
 **Examples:**
 - "A user logs-in." (Simple)
 - "A user logs-in, and the system verifies credentials." (Conjunction)
 - "A user logs-in, and the system verifies credentials, or the connection times-out." (DNF)
+- "Either the user authenticates, or the session expires." (Exclusive disjunction)
+- "Neither the card is valid, nor the PIN is correct." (Negative conjunction)
 
 **Design Rationale:** Natural language at sentence level improves readability; the comma serves as a visual boundary closing each simple sentence.
 
@@ -811,6 +822,248 @@ For complete rules on Sloj-in-Markdown integration, including:
 - Tool implementation guidelines
 
 See the separate specification: [`sloj-spec-markdown.md`](sloj-spec-markdown.md).
+
+---
+
+## 14. Lexical Rules
+
+This section defines word formation rules and lexical conventions for Sloj.
+
+### 14.0 Capitalization and Noun Category
+
+**A capitalized word's grammatical category is determined by the presence or absence of a determiner:**
+
+| Pattern | Category | Example |
+|---------|----------|---------|
+| Capitalized WITHOUT determiner | Proper noun | `Alice runs.`, `Server1 starts.` |
+| Capitalized WITH determiner | Unique noun | `The GPS starts.`, `The Database fails.` |
+| Lowercase WITH determiner | Common noun | `The server starts.`, `A user logs-in.` |
+
+**This rule enables deterministic parsing:** The parser examines whether a determiner precedes the capitalized word to classify it as proper or unique.
+
+### 14.1 Compound Words
+
+**Multi-word entities MUST be hyphenated** to form a single lexical unit.
+
+When multiple words together designate a single entity or concept, they are joined with hyphens to form a compound word.
+
+**Examples:**
+- `error-message` (not "error message")
+- `brake-lock` (not "brake lock")
+- `session-timeout` (not "session timeout")
+- `file-system` (not "file system")
+- `request-handler` (not "request handler")
+
+**Rationale:** Hyphenation eliminates ambiguity in parsing and ensures deterministic tokenization. Without hyphenation, "error message" could be interpreted as two separate nouns coordinated or as a noun with a modifier.
+
+### 14.2 Reflexive Verb Prefix
+
+Reflexive actions use the `self-` prefix attached to the verb.
+
+**Examples:**
+- `self-authenticate` (Bob self-authenticates.)
+- `self-validate` (The system self-validates.)
+- `self-destruct` (The process self-destructs.)
+
+**Note:** This is the ONLY way to express reflexive actions in Sloj. Reflexive pronouns (himself, herself, itself) are forbidden.
+
+### 14.3 Common Nouns
+
+Common nouns follow standard English morphology with regular and irregular plural forms.
+
+**Singular/Plural:**
+- Regular: `user` / `users`, `card` / `cards`, `process` / `processes`
+- Irregular: `datum` / `data`, `index` / `indices`, `child` / `children`
+
+**Compound noun pluralization:**
+- The final component takes the plural marker: `error-message` / `error-messages`
+- Exception: irregular plurals follow English rules: `man-hour` / `man-hours`
+
+### 14.4 Proper Nouns
+
+Proper nouns designate specific named entities and begin with a capital letter.
+
+**Identification rule:** A capitalized word WITHOUT a determiner is a proper noun.
+
+**Pattern:** `[A-Z][A-Za-z0-9-]*`
+
+**Multi-word proper names:** Multiple consecutive capitalized words form a single proper noun and MUST be hyphenated.
+
+**Examples:**
+- Single-word names: `Alice`, `Bob`, `Carol`
+- Multi-word names: `John-Ford`, `Mary-Jane`, `Jean-Paul`, `Ada-Lovelace`
+- System identifiers: `Server1`, `Disk-A`, `Process-42`
+- Technical names: `HTTP-Server`, `Database-Primary`, `Load-Balancer-1`
+
+**Conversion examples:**
+
+| English name | Sloj proper noun |
+|--------------|------------------|
+| John Ford | `John-Ford` |
+| Mary Jane Watson | `Mary-Jane-Watson` |
+| Jean Paul Sartre | `Jean-Paul-Sartre` |
+| New York | `New-York` |
+| San Francisco | `San-Francisco` |
+
+**Rationale:** Without hyphenation, "John Ford" would be parsed as two separate proper nouns, potentially creating ambiguity in reference resolution and binding. Hyphenation ensures the parser treats the entire name as a single lexical unit with a single referent.
+
+**Determiner prohibition:** Proper nouns MUST NOT be preceded by determiners (`a`, `an`, `the`, etc.). The presence of a determiner indicates a unique noun or common noun, not a proper noun.
+
+**Gender assignment:**
+- Male/Female: Based on recognized name lists (lexicon-dependent)
+- Neutral: All other proper nouns including technical identifiers and hyphenated names not in gender lists
+
+### 14.5 Unique Nouns
+
+Unique nouns designate entities that are unique within the discourse context.
+
+**Identification rule:** A capitalized word WITH a determiner is a unique noun (typically `the`).
+
+**Pattern:** `[A-Z][A-Za-z0-9-]*` (same as proper nouns, but distinguished by presence of determiner)
+
+**Examples:**
+- Technical systems: `the GPS`, `the API`, `the Database`
+- Domain-specific entities: `the Server`, `the Controller`, `the Manager`
+- Multi-word unique nouns: `the Load-Balancer`, `the File-System`, `the Error-Handler`
+
+**Determiner requirement:** Unique nouns MUST be preceded by a determiner. The most common determiner is `the`, but possessives are also permitted: `its Database`, `their Server`.
+
+**Distinction from proper nouns:**
+
+| Form | Category | Example |
+|------|----------|---------|
+| Capitalized WITHOUT determiner | Proper noun | `GPS starts.` |
+| Capitalized WITH determiner | Unique noun | `The GPS starts.` |
+| Lowercase WITH determiner | Common noun | `The server starts.` |
+
+**Note:** The same word can function as either proper or unique depending on whether a determiner is present. The parser uses the determiner as the discriminating signal.
+
+### 14.6 Mass Nouns
+
+Mass nouns designate uncountable substances or abstract concepts.
+
+**Examples:**
+- Physical substances: `water`, `fuel`, `data`, `memory`
+- Abstract concepts: `information`, `bandwidth`, `storage`
+
+**Determiners:** Mass nouns require mass determiners: `the`, `some`, `no`, `more`, `less`, `enough`
+
+**Quantification:** Use measurement phrases: `3 liters of water`, `500 megabytes of data`
+
+### 14.7 Adjectives
+
+Adjectives may be:
+- **Simple:** `valid`, `active`, `red`, `fast`
+- **Compound:** `two-factor`, `high-priority`, `multi-threaded`
+- **Comparative:** `larger`, `faster`, `more-complex`
+- **Superlative:** `largest`, `fastest`, `most-complex`
+
+**Compound adjectives:** Multiple words forming a single adjective MUST be hyphenated: `high-priority`, `real-time`, `mission-critical`
+
+### 14.8 Verbs
+
+Verbs follow standard English conjugation with present, past, and past participle forms.
+
+**Forms required in lexicon:**
+- **Base form:** `validate`, `process`, `send`
+- **Third-person singular:** `validates`, `processes`, `sends`
+- **Past participle:** `validated`, `processed`, `sent`
+
+**Compound verbs:** Use hyphenation: `re-validate`, `pre-process`, `cross-reference`
+
+**Self-prefixed verbs:** `self-` + base form: `self-authenticate`, `self-validate`
+
+### 14.9 Adverbs
+
+Adverbs modify verbs, adjectives, or other adverbs.
+
+**Examples:**
+- Simple: `quickly`, `always`, `immediately`
+- Compound: `real-time` (when used adverbially)
+- Comparative: `faster`, `more-quickly`
+- Superlative: `fastest`, `most-quickly`
+
+### 14.10 Numbers
+
+Numbers may be:
+- **Integer:** `0`, `42`, `-5`, `1000`
+- **Decimal:** `3.14`, `0.5`, `-2.718`
+- **Scientific notation:** Not currently supported (use explicit notation in string literals if needed)
+
+**Negative numbers:** Use minus sign prefix: `-5`, `-3.14`
+
+**Large numbers:** Use digits without separators: `1000000` (not `1,000,000` or `1_000_000`)
+
+### 14.11 Lexicon Dependency
+
+All content words (nouns, verbs, adjectives, adverbs) MUST be defined in the project lexicon.
+
+The lexicon specifies:
+- **Word category:** common noun, unique noun, mass noun, proper noun, verb, adjective, adverb
+- **Morphological forms:** singular/plural for nouns, conjugations for verbs
+- **Semantic type:** for type checking (e.g., what arguments a verb accepts)
+- **Gender:** for proper nouns (used in pronoun resolution)
+
+**Unknown words:** If a word appears in a Sloj document but is not in the lexicon, semantic tools (like `sloj-lint`) MUST report an error.
+
+### 14.12 Reserved Words
+
+The following words are reserved for Sloj syntax and MUST NOT be used as lexicon entries:
+
+**Logical operators:** `and`, `or`, `not`, `either`, `neither`, `nor`
+
+**Quantifiers:** `all`, `some`, `every`, `each`, `no`, `any`, `none`
+
+**Determiners:** `a`, `an`, `the`, `enough`, `his`, `her`, `its`, `their`
+
+**Modals:** `must`, `may`, `should`, `will`, `can`
+
+**Conditionals:** `if`, `then`, `whenever`, `once`, `otherwise`, `unless`, `except`
+
+**Temporal:** `before`, `after`, `while`, `until`, `first`, `finally`
+
+**Structural:** `that`, `of`, `to`, `than`, `between`
+
+**Copula/Auxiliaries:** `is`, `are`, `be`, `been`, `has`, `have`, `does`, `do`
+
+**Pronouns:** `he`, `she`, `it`, `they`, `him`, `her`, `them`
+
+**Existential:** `there`
+
+**Note:** Reserved words appear in the grammar and have fixed syntactic roles. They cannot be redefined in the lexicon.
+
+### 14.13 Case Sensitivity
+
+Sloj is **case-sensitive** with the following conventions:
+
+**Proper nouns:** Begin with capital letter: `Alice`, `Server1`
+
+**Unique nouns:** Begin with capital letter: `GPS`, `Database`
+
+**All other words:** Lowercase: `user`, `validates`, `active`, `quickly`
+
+**Reserved words:** Always lowercase: `if`, `then`, `and`, `or`
+
+**Exception:** At sentence start, the first word is capitalized regardless of its category (standard English convention).
+
+### 14.14 Character Set
+
+Sloj uses UTF-8 encoding.
+
+**Allowed characters in words:**
+- Letters: `A-Z`, `a-z` (ASCII), and Unicode letters for internationalization (future extension)
+- Digits: `0-9` (in proper nouns, numbers, and identifiers)
+- Hyphen: `-` (in compound words and proper nouns)
+- Underscore: `_` (in annotation identifiers only)
+
+**Special characters:**
+- Guillemets: `«` (U+00AB), `»` (U+00BB)
+- Operators: `&`, `/`, `&&`, `&&/`
+- Punctuation: `,`, `.`, `:`, `;`
+- String delimiters: `"` (U+0022), `` ` `` (U+0060)
+- Annotation delimiters: `[[`, `]]`
+
+**Whitespace:** Space (U+0020), tab (U+0009), newline (U+000A)
 
 ---
 

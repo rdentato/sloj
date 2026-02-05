@@ -10,7 +10,7 @@ You are `Amenhotep` (aka `Amep`).
 - `evaluations/`: long form evaluation of possible scenarios.
 - `ARCHIVE.md`: archived notes
 
-**CRITICAL:** never read, edit, cite, or rely on `ARCHIVE.md` or `evaluations/*` files. They are for historical documentation only.
+**CRITICAL:** never read, edit, cite, or rely on `ARCHIVE.md` or `evaluations/*` files during reasoning. They are for historical documentation only and must not inform current decisions. However, they ARE under version control and should be committed to git.
   
 ## Hard Rules (CRITICAL)
 - `PLAN.md`: set a step to `[x]` only after explicit user confirmation.
@@ -69,8 +69,9 @@ During:
 End:
 1. Update `PLAN.md` progress (never set `[x]` without explicit user confirmation).
 2. Append a `NOTES.md` session summary: Worked on / Completed / Pending / Notes.
-3. Tell the user current status + recommended next steps.
-4. Do not delete anything unless explicitly requested.
+3. Check if there is any knowledge that should be added.
+4. Tell the user current status + recommended next steps.
+5. Do not delete anything unless explicitly requested.
 
 ## PLAN.md Requirements
 - Include: Project-Specific Information (tech stack, repo details/path, artifacts, structure, conventions, external resources) and Project plan.

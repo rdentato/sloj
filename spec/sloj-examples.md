@@ -715,16 +715,41 @@ The system validates the input && either:
 ### 9.1 Proper Nouns
 
 ```sloj
-"John is a user."
+"Alice is a user."
 ```
-*Proper noun (no determiner)*
+*Proper noun (single word, no determiner)*
+
+```sloj
+"John-Ford is an administrator."
+```
+*Proper noun (multi-word, hyphenated, no determiner)*
+
+```sloj
+"Server1 starts."
+```
+*Proper noun (identifier, no determiner)*
+
+```sloj
+"Jean-Paul sends a request."
+```
+*Multi-word proper noun*
 
 ### 9.2 Unique Nouns
 
 ```sloj
 "The GPS is active."
 ```
-*Unique noun (with determiner)*
+*Unique noun (capitalized with determiner)*
+
+```sloj
+"The Database fails."
+```
+*Unique noun - same word would be proper noun without determiner*
+
+```sloj
+"The Load-Balancer handles requests."
+```
+*Unique noun (multi-word compound with determiner)*
 
 ### 9.3 Mass Nouns
 
@@ -780,6 +805,21 @@ The system validates the input && either:
 "The server S1 receives a request."
 ```
 *Binding with neutral identifier*
+
+```sloj
+"A user John-Ford logs-in."
+```
+*Multi-word proper noun (hyphenated)*
+
+```sloj
+"The administrator Mary-Jane approves the request."
+```
+*Multi-word proper noun with determiner on common noun*
+
+```sloj
+"A customer, named Jean-Paul, submits a form."
+```
+*Multi-word proper noun with explicit binding*
 
 ---
 

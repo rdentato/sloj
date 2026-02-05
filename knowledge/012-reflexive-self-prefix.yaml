@@ -2,7 +2,8 @@ statement: >
   Reflexive actions use self- prefix on the verb instead of reflexive pronouns.
   Example: "Bob self-authenticates" not "Bob authenticates himself".
 trigger: Structural rule from spec document
-related: []
+related:
+  - 017-multi-word-entity-hyphenation
 tags:
   - pronoun
   - verb

@@ -1,0 +1,9 @@
+statement: A capitalized word's grammatical category is determined by determiner presence - NO determiner = proper noun (Alice runs), WITH determiner = unique noun (The GPS starts). This enables deterministic parsing without lexicon lookup during parse time.
+trigger: Discussion about proper vs unique nouns and parser disambiguation
+related:
+  - 017-multi-word-entity-hyphenation
+  - 008-nominalizations-common-nouns
+tags:
+  - determinism
+  - noun-categories
+created: 2026-02-05

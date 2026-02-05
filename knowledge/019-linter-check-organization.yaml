@@ -1,0 +1,8 @@
+statement: Sloj linter semantic checks are organized into categories with unique IDs - Agreement (AGR), Reference (REF), Scope (SCP), Temporal (TMP), Type (TYP), Partitive (PAR), List (LST), String (STR), PP-attachment (PP), Exception (EXC), Consistency (CON), Style (STY), Annotation (ANN), Lexicon (LEX). Format is CATEGORY-NNN (e.g., AGR-001).
+trigger: Creating linter specification in lint/spec/lint-spec.md
+related:
+  - 014-annotations-non-normative
+tags:
+  - tooling-structure
+  - error-codes
+created: 2026-02-05

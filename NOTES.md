@@ -10,9 +10,10 @@
 
 - Spec is at v0.1 Draft status
 - Phase 2 (Syntax specification) is **COMPLETE**
+- Phase 4.3 (LLM usage) is **COMPLETE** - prompts at v1.1 (writer) and v1.2 (reader)
 - Phase 4 (Tooling) started with lint subproject
 - Grammar file: `spec/sloj-spec-grammar.bnf`
-- Persistent knowledge stored in `knowledge/` (16 entries)
+- Persistent knowledge stored in `knowledge/` (20 entries)
 
 ## Open Questions
 
@@ -21,6 +22,11 @@
 ## Deferred Features
 
 - **Sentence negation (task 2.9)**: VP negation (`does not`, `do not`) covers most use cases. Sentence-level negation (`it is false that S`) deferred.
+- **Let-binding syntax**: Proposed `Let Name be NP, then...` syntax discussed and rejected. Current proper noun binding is sufficient; adding keyword would violate minimalism without solving real problem.
+
+## Future Enhancements
+
+- **Claude Code skills**: May want to transform sloj-reader-prompt.md and sloj-writer-prompt.md into auto-activated skills for seamless workflow.
 
 ## Known Issues / Blockers
 
@@ -30,53 +36,59 @@
 
 ## Session Log
 
-### 2026-02-01
-**Worked on:** 
-- Rewritten spec document (reduced from ~1740 to ~429 lines)
-- Completed spec-grammar consistency evaluation
-- Added Quick Reference Index (115 entries)
-- Completed tasks 2.1, 2.5, 2.6, 2.7, 2.8, 2.12, 2.13, 2.14, 2.15
-
-**Completed:**
-- All Tier 1, Tier 2 features (except deferred sentence negation)
-- All Tier 3 features
-
-### 2026-02-02 (Session 1)
+### 2026-02-05 (Session 3)
 **Worked on:**
-- Annotations, Nominalizations, Lists/enumeration
+- Lint spec Sloj conformance review
+- Prompt enhancements (sentence structure rule)
+- Systematic hyphenation corrections
 
 **Completed:**
-- Task 2.12: Annotations
-- Task 2.14: Nominalizations (resolved as regular common nouns)
-- Task 2.13: Lists/enumeration
-
-### 2026-02-02 (Session 2)
-**Worked on:**
-- SNGL vs Sloj comparison evaluation
-- Open/closed world list distinction
-
-**Completed:**
-- Ellipsis syntax for open-world lists
+- Reviewed `lint/spec/lint-spec.md` against sloj-reader-prompt.md and sloj-writer-prompt.md
+- Applied stylistic improvements: consolidated repetitive coordination into list syntax (2 instances)
+- Applied systematic hyphenation to ~40+ technical terms (common-noun, error-message, VP-negation, etc.)
+- Fixed capitalization: `Markdown-list` → `markdown-list` (common-noun, not proper-noun)
+- Added missing determiners to plural/singular common-nouns (8 instances)
+- Enhanced prompts with sentence-start rule (v1.0 → v1.1 writer, v1.0 → v1.2 reader)
+- Added validation/error-reporting section to reader prompt
+- Created knowledge entry 017: sentence-start-rule
+- Discussed and rejected "Let-binding" syntax proposal
 
 **Pending:**
-- Interpretation Rules appendix (deferred)
+- Task A.1.1 (Define semantic check categories) - still awaiting user confirmation for [x]
 
-### 2026-02-02 (Session 3)
+**Notes:**
+- Lint spec now 100% Sloj-conformant with consistent hyphenation
+- Prompts enhanced with fundamental sentence structure constraint
+- Reader prompt now actively validates and reports Sloj syntax errors
+- Identified key rule: "Every Sloj sentence begins with determiner, proper-noun, or keyword"
+
+### 2026-02-05 (Session 2)
 **Worked on:**
-- Contractions, Phase 2 completion, Markdown integration, Lint subproject init
+- Spec refinement (sentence coordination, lexical rules)
+- LLM prompts (reader and writer)
+- Linter specification
+- Comprehensive testing
 
 **Completed:**
-- Task 2.16: Contractions
-- Task 2.17: Markdown integration specification
-- **Phase 2 (Syntax specification) - COMPLETE**
-- Lint subproject initialization
+- Fixed spec Section 2.1: Added `Either S, or P` and `Neither S, nor P` at sentence level
+- Added spec Section 14: Lexical Rules (compound words, multi-word proper nouns, capitalization rules, morphology)
+- Created `prompts/sloj-reader-prompt.md` (~2400 tokens, 12 warnings)
+- Created `prompts/sloj-writer-prompt.md` (~3500 tokens, 14 rules)
+- Created 47 test cases (17 reader + 30 writer)
+- Executed all tests: 100% pass rate
+- Created `lint/spec/lint-spec.md` (comprehensive linter spec written in Sloj, 42 check types)
+- Created 2 evaluation documents in `evaluations/`
 
 **Pending:**
-- Task A.1.1: Define semantic check categories
-- Task A.1.2: Design error message format and severity levels
-- Task A.1.3: Define linter architecture and components
+- Task A.1.1 (Define semantic check categories) - completed but not marked [x] in PLAN.md
 
-### 2026-02-05
+**Notes:**
+- Spec now complete with lexical rules: hyphenation for multi-word entities, proper noun handling, capitalization+determiner rules
+- Both LLM prompts are production-ready (v1.0)
+- Test results validate prompt effectiveness
+- Linter spec defines all semantic checks needed
+
+### 2026-02-05 (Session 1)
 **Worked on:**
 - Knowledge base initialization
 - AGENTS.md and NOTES.md alignment

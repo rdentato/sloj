@@ -1,0 +1,9 @@
+statement: Every Sloj sentence begins with either a determiner (a, the, numbers, some, every, etc.), a proper-noun (capitalized, no determiner), a conditional/temporal keyword (if, whenever, once), a sentence coordinator (Either, Neither), or the existential keyword (There). This fundamental constraint prevents sentences from starting with adjectives, verbs, or adverbs.
+trigger: User asked if "every sentence begins with a keyword or proper name" rule was correct; analysis confirmed this pattern from grammar
+related:
+  - 017-multi-word-entity-hyphenation
+  - 011-determiner-noun-category-rules
+tags:
+  - validation
+  - parsing
+created: 2026-02-05
