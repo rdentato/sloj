@@ -1,0 +1,9 @@
+statement: Symbolic operators replace natural language and/or within phrases. NP uses &, /, &/; VP uses &&, &&/, && then. Fixed forms either...or and neither...nor are exceptions.
+trigger: Core syntax decision from spec document
+related:
+  - 001-sloj-project-scope
+tags:
+  - syntax
+  - conjunction
+  - disjunction
+created: 2026-02-05

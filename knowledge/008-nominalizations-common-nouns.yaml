@@ -1,0 +1,8 @@
+statement: Event nominals (validation, reading) and property nominals (coldness, validity) are treated as regular common nouns. They use standard NP syntax with of-clauses for arguments; the lexicon categorizes them for semantic processing.
+trigger: Semantic decision from spec document
+related: []
+tags:
+  - noun
+  - lexicon
+  - semantics
+created: 2026-02-05

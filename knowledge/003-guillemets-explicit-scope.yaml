@@ -1,0 +1,11 @@
+statement: >
+  Guillemets delimit scope of modifiers and operators, overriding default left-to-right evaluation.
+  Windows input: Alt+0171 for left guillemet, Alt+0187 for right guillemet.
+trigger: Core syntax decision from spec document
+related:
+  - 002-symbolic-operators-coordination
+tags:
+  - syntax
+  - grouping
+  - disambiguation
+created: 2026-02-05

@@ -1,0 +1,11 @@
+statement: >
+  Annotations (using double-bracket syntax with key-value pairs or free text) provide metadata
+  for requirements. They are documentary elements that do not affect formal logic mapping.
+trigger: Documentary element from spec document
+related:
+  - 013-purpose-clauses-non-normative
+tags:
+  - metadata
+  - documentation
+  - tooling
+created: 2026-02-05

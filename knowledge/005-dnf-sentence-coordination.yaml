@@ -1,0 +1,9 @@
+statement: Sentence coordination uses DNF structure. Disjunction (, or) is outer level; conjunction (, and / , but / , whereas) is inner level. Natural language conjunctions permitted only at sentence boundaries.
+trigger: Core syntax decision from spec document
+related:
+  - 002-symbolic-operators-coordination
+tags:
+  - syntax
+  - sentence
+  - logic
+created: 2026-02-05

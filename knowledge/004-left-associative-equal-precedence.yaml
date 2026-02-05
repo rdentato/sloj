@@ -1,0 +1,10 @@
+statement: All NP and VP operators have equal precedence and are left-associative. Use guillemets to override default evaluation order.
+trigger: Core syntax decision from spec document
+related:
+  - 002-symbolic-operators-coordination
+  - 003-guillemets-explicit-scope
+tags:
+  - syntax
+  - parsing
+  - precedence
+created: 2026-02-05

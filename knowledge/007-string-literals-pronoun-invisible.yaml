@@ -1,0 +1,8 @@
+statement: String literals (quoted or backticked) are invisible to pronoun resolution. Pronouns skip strings and refer to the nearest preceding NP antecedent.
+trigger: Semantic decision from spec document
+related: []
+tags:
+  - pronoun
+  - reference
+  - string
+created: 2026-02-05

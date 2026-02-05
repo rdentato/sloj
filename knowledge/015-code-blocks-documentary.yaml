@@ -1,0 +1,10 @@
+statement: Fenced code blocks (``` or ~~~) appear at sentence level only and are purely documentary. They are invisible to pronoun resolution and do not participate in coordination or conditionals.
+trigger: Documentary element from spec document
+related:
+  - 013-purpose-clauses-non-normative
+  - 014-annotations-non-normative
+tags:
+  - documentation
+  - markdown
+  - syntax
+created: 2026-02-05

@@ -1,0 +1,9 @@
+statement: SNGL is Sloj's predecessor language. When uncertain about how to implement a feature, check ref/sngl-syntax.doc for guidance on how it was done in SNGL.
+trigger: Design reference from NOTES.md
+related:
+  - 001-sloj-project-scope
+tags:
+  - design
+  - reference
+  - history
+created: 2026-02-05

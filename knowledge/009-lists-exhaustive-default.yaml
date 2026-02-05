@@ -1,0 +1,8 @@
+statement: Lists are exhaustive (closed-world) by default. Trailing ellipsis (... or …) indicates an open list where other values may exist.
+trigger: Semantic decision from spec document
+related: []
+tags:
+  - enumeration
+  - closed-world
+  - open-world
+created: 2026-02-05

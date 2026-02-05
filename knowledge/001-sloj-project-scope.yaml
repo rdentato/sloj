@@ -1,0 +1,8 @@
+statement: Sloj is a controlled natural language (CNL) designed for writing unambiguous, formally-grounded requirements specifications with deterministic parsing.
+trigger: Project scope definition needed for knowledge base
+related: []
+tags:
+  - cnl
+  - requirements
+  - specification
+created: 2026-02-05

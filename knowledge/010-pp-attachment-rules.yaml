@@ -1,0 +1,12 @@
+statement: >
+  PP attachment rules: of-clauses attach to preceding NP; other PPs attach to preceding verb
+  (or NP if no verb). Guillemets override default attachment. Object-position NPs must not
+  contain non-of PPs unless guillemeted.
+trigger: Structural rule from spec document
+related:
+  - 003-guillemets-explicit-scope
+tags:
+  - syntax
+  - preposition
+  - attachment
+created: 2026-02-05

@@ -1,0 +1,9 @@
+statement: Purpose clauses (in order to + infinitive VP) are documentary elements. They explain why a requirement exists but do not affect formal logic mapping or create additional requirements.
+trigger: Documentary element from spec document
+related:
+  - 014-annotations-non-normative
+tags:
+  - documentation
+  - rationale
+  - semantics
+created: 2026-02-05

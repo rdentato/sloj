@@ -1,0 +1,8 @@
+statement: The phrase "may not" is intentionally undefined in Sloj. Use "must not" for prohibition; "may" alone for permission.
+trigger: Semantic decision from spec document
+related: []
+tags:
+  - modal
+  - prohibition
+  - ambiguity
+created: 2026-02-05

@@ -1,0 +1,10 @@
+statement: >
+  Reflexive actions use self- prefix on the verb instead of reflexive pronouns.
+  Example: "Bob self-authenticates" not "Bob authenticates himself".
+trigger: Structural rule from spec document
+related: []
+tags:
+  - pronoun
+  - verb
+  - reflexive
+created: 2026-02-05
